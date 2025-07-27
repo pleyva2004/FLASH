@@ -1,7 +1,10 @@
 import os
+import dotenv
 from openai import OpenAI
 
 def text_to_speech_api(text_to_synthesize: str):
+    dotenv.load_dotenv()
+    
     client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
     response = client.audio.speech.create(

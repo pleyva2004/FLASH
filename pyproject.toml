@@ -14,6 +14,7 @@ numpy = "^2.3.2"
 sounddevice = "^0.5.2"
 scipy = "^1.16.0"
 soundfile = "^0.13.1"
+dotenv = "^0.9.9"
 
 [build-system]
 requires = ["poetry-core"]

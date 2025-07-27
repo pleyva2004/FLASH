@@ -1,14 +1,18 @@
 import os
-from openai import OpenAI
 import io
+import dotenv
+
+from openai import OpenAI
 
 def speech_to_text_api(audio_data: bytes, sample_rate: int):
+    dotenv.load_dotenv()
+    
     client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
     # The API expects a file-like object. We can use io.BytesIO for in-memory bytes.
     # We also need to give it a name, as if it were a file upload.
     audio_file = io.BytesIO(audio_data)
-    audio_file.name = "audio.wav"  # Corrected to WAV format
+    audio_file.name = "audio.mp3"  # Corrected to MP3 format
 
     transcript = client.audio.transcriptions.create(
         model="gpt-4o-transcribe",
