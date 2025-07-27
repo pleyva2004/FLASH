@@ -9,6 +9,50 @@ DEFAULT_MIN_SILENCE_DURATION_MS = 1000 # 1 second of silence to stop
 DEFAULT_MAX_RECORDING_DURATION_S = 15 # Safety cap for recording
 DEFAULT_PRE_ROLL_CHUNKS = 3 # Number of chunks to keep before speech starts
 
+def check_audio_devices():
+    """Check and print available audio devices."""
+    try:
+        print("\n--- Audio Device Diagnostic ---")
+        devices = sd.query_devices()
+        print("Available audio devices:")
+        
+        input_devices = []
+        for i, device in enumerate(devices):
+            device_type = []
+            if device['max_input_channels'] > 0:
+                device_type.append("input")
+                input_devices.append(i)
+            if device['max_output_channels'] > 0:
+                device_type.append("output")
+            
+            device_type_str = "/".join(device_type) if device_type else "none"
+            print(f"  {i}: {device['name']} ({device_type_str})")
+            print(f"      Max inputs: {device['max_input_channels']}, Max outputs: {device['max_output_channels']}")
+        
+        # Check default devices
+        try:
+            default_input = sd.default.device[0] if sd.default.device[0] is not None else "None"
+            default_output = sd.default.device[1] if sd.default.device[1] is not None else "None"
+            print(f"\nDefault input device: {default_input}")
+            print(f"Default output device: {default_output}")
+        except Exception as e:
+            print(f"Error getting default devices: {e}")
+        
+        # Check if we have any input devices
+        if not input_devices:
+            print("\n⚠️  WARNING: No input devices found! This will cause recording to fail.")
+            print("   This is common in WSL2 where audio devices are not accessible.")
+            return False
+        else:
+            print(f"\n✅ Found {len(input_devices)} input device(s) that can be used for recording.")
+            return True
+            
+    except Exception as e:
+        print(f"❌ Error checking audio devices: {e}")
+        print("This suggests PortAudio is not properly configured or no audio system is available.")
+        return False
+
+
 def record_audio(sample_rate = DEFAULT_SAMPLE_RATE,
                  channels = DEFAULT_CHANNELS,
                  chunk_size_ms = DEFAULT_CHUNK_SIZE_MS,
@@ -33,6 +77,13 @@ def record_audio(sample_rate = DEFAULT_SAMPLE_RATE,
     is_recording = False
     silence_counter = 0
     chunks_recorded = 0
+
+
+    # Run audio device diagnostic before attempting to create stream
+    if not check_audio_devices():
+        print("⚠️  Audio device check failed. Recording may not work properly.")
+        print("If running in WSL2, consider running on Windows directly instead.")
+
 
     with sd.InputStream(samplerate=sample_rate, channels=channels, dtype='float32') as stream:
 
@@ -94,6 +145,16 @@ def play_audio_data(audio_data, sample_rate):
 
 if __name__ == "__main__":
     print("--- Testing audio_utils.py ---")
+
+    # First, check available audio devices
+    print("\n--- Audio Device Check ---")
+    devices_available = check_audio_devices()
+    
+    if not devices_available:
+        print("\n❌ No suitable audio devices found. Skipping audio tests.")
+        print("--- audio_utils.py tests finished. ---")
+        exit(1)
+
 
     # Test 1: record_audio() and play_audio_data() (in-memory)
     print("\n--- Test: Record and Play In-Memory Audio ---")
