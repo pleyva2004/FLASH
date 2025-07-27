@@ -2,6 +2,7 @@ import numpy as np
 import scipy.io.wavfile
 import io
 import soundfile # For converting MP3 bytes to NumPy array
+from pydub import AudioSegment
 
 from pocketflow import Node
 from utils.audio_utils import record_audio, play_audio_data
@@ -46,13 +47,19 @@ class SpeechToTextNode(Node):
 
         audio_numpy_array, sample_rate = prep_res
         
-        # Convert NumPy array to WAV bytes for the API
+        # Convert NumPy array to MP3 bytes for the API
+        audio_segment = AudioSegment(
+            audio_numpy_array.tobytes(),
+            frame_rate=sample_rate,
+            sample_width=audio_numpy_array.dtype.itemsize,
+            channels=1
+        )
         byte_io = io.BytesIO()
-        scipy.io.wavfile.write(byte_io, sample_rate, audio_numpy_array)
-        wav_bytes = byte_io.getvalue()
+        audio_segment.export(byte_io, format="mp3")
+        mp3_bytes = byte_io.getvalue()
         
         print("Converting speech to text...")
-        transcribed_text = speech_to_text_api(audio_data=wav_bytes, sample_rate=sample_rate)
+        transcribed_text = speech_to_text_api(audio_data=mp3_bytes, sample_rate=sample_rate)
         return transcribed_text
 
     def post(self, shared, prep_res, exec_res):
