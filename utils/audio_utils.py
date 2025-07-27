@@ -78,13 +78,6 @@ def record_audio(sample_rate = DEFAULT_SAMPLE_RATE,
     silence_counter = 0
     chunks_recorded = 0
 
-
-    # Run audio device diagnostic before attempting to create stream
-    if not check_audio_devices():
-        print("⚠️  Audio device check failed. Recording may not work properly.")
-        print("If running in WSL2, consider running on Windows directly instead.")
-
-
     with sd.InputStream(samplerate=sample_rate, channels=channels, dtype='float32') as stream:
 
         for i in range(max_chunks):
