@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "flash"
+version = "0.1.0"
+description = "This project is focused on low-latency response assistant. FLASH – Fast Listening and Speech Handler"
+authors = ["Pablo_Linux <pleyva2004@gmail.com>"]
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.12"
+openai = "^1.97.1"
+pocketflow = "^0.0.2"
+numpy = "^2.3.2"
+sounddevice = "^0.5.2"
+scipy = "^1.16.0"
+soundfile = "^0.13.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
